@@ -24,7 +24,7 @@
                     sh '''
                         echo "Cleaning existing container if exist"
                         docker ps -a | grep -i $IMAGE_NAME && docker rm -f $IMAGE_NAME
-                        docker run --name $IMAGE_NAME -d -p $APP_EXPOSER_PORT:$APP_ECONTAINER_PORT -e PORT=$APP_CONTAINER_PORT ${DOCKERHUB_ID}/$IMAGE_NAME:$IMAGE_TAG
+                        docker run --name $IMAGE_NAME -d -p $APP_EXPOSER_PORT:$APP_CONTAINER_PORT -e PORT=$APP_CONTAINER_PORT ${DOCKERHUB_ID}/$IMAGE_NAME:$IMAGE_TAG
                         sleep 5
                     '''
                 }
