@@ -1,5 +1,5 @@
 FROM nginx:1.21.1
-LABEL maintainer= "tafitasoa"
+LABEL maintainer="tafitasoa"
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get install -y curl && \
