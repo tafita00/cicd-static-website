@@ -24,12 +24,22 @@
                     sh '''
                         echo "Cleaning existing container if exist"
                         docker ps -a | grep -i $IMAGE_NAME && docker rm -f $IMAGE_NAME
-                        docker run --name $IMAGE_NAME -d -p $APP_EXPOSER_PORT:$APP_CONTAINER_PORT -e PORT=$APP_CONTAINER_PORT ${DOCKERHUB_ID}/$IMAGE_NAME:$IMAGE_TAG
+                        docker run --name $IMAGE_NAME -d -p $APP_EXPOSED_PORT:$APP_CONTAINER_PORT -e PORT=$APP_CONTAINER_PORT ${DOCKERHUB_ID}/$IMAGE_NAME:$IMAGE_TAG
                         sleep 5
                     '''
                 }
             }
-        }   
+        }
+      stage('Test image'){
+            agent any
+            steps {
+                script {
+                    sh '''
+                        curl 172.17.0.1 | grep -i "Dimension"
+                    '''
+                }
+            }
+        }
         stage('Clean container'){
             agent any
             steps{
