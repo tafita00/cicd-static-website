@@ -6,6 +6,7 @@
         IMAGE_TAG = "latest"
         DOCKERHUB_ID = "tafitasoa0"
         DOCKERHUB_PASSWORD = credentials('dockerhub_password')
+        SCANNER_HOME=tool 'sonar-scanner'
     }
     agent none
     stages{
@@ -28,6 +29,32 @@
                         sleep 5
                     '''
                 }
+            }
+        }
+       stage("Sonarqube Analysis "){
+            steps{
+                withSonarQubeEnv('sonar-server') {
+                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=uptime \
+                    -Dsonar.projectKey=uptime '''
+                }
+            }
+        }
+        stage("quality gate"){
+           steps {
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar_token' 
+                }
+            } 
+        }
+        stage('OWASP FS SCAN') {
+            steps {
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+        stage('TRIVY FS SCAN') {
+            steps {
+                sh "trivy fs . &gt; trivyfs.json"
             }
         }
       stage('Test image'){
