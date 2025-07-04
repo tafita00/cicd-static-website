@@ -13,7 +13,7 @@
       stage('Clone code from GitHub'){
            agent any 
            steps{
-              git url: 'https://github.com/tafita00/ic-webapp.git', branch: 'main'   
+              git url: 'https://github.com/tafita00/cicd-static-website.git', branch: 'main'   
            } 
        }
         stage('Build Image'){
