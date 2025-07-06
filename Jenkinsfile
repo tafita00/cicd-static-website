@@ -8,30 +8,14 @@
         DOCKERHUB_PASSWORD = credentials('dockerhub_password')
         SCANNER_HOME=tool 'sonar-scanner'
     }
-    agent none
+    agent any
     stages{
-        stage('Build Image'){
-            agent any
-            steps {
-                script {
-                    sh 'docker build -t ${DOCKERHUB_ID}/$IMAGE_NAME:$IMAGE_TAG .'
-                }
-            }
-        }
-        stage('Run container basedon builded image'){
-            agent any
-            steps{
-                script{
-                    sh '''
-                        echo "Cleaning existing container if exist"
-                        docker ps -a | grep -i $IMAGE_NAME && docker rm -f $IMAGE_NAME
-                        docker run --name $IMAGE_NAME -d -p $APP_EXPOSED_PORT:$APP_CONTAINER_PORT -e PORT=$APP_CONTAINER_PORT ${DOCKERHUB_ID}/$IMAGE_NAME:$IMAGE_TAG
-                        sleep 5
-                    '''
-                }
-            }
-        }
-       stage("Sonarqube Analysis "){
+        stage('Clone code from GitHub'){
+           steps{
+              git url: 'https://github.com/tafita00/cicd-static-website.git', branch: 'main'   
+           } 
+       }
+         stage("Sonarqube Analysis "){
             steps{
                 withSonarQubeEnv('sonar-server') {
                     sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=uptime \
@@ -55,6 +39,25 @@
         stage('TRIVY FS SCAN') {
             steps {
                 sh "trivy fs . &gt; trivyfs.json"
+            }
+        }
+        stage('Build Image'){
+            steps {
+                script {
+                    sh 'docker build -t ${DOCKERHUB_ID}/$IMAGE_NAME:$IMAGE_TAG .'
+                }
+            }
+        }
+        stage('Run container basedon builded image'){
+            steps{
+                script{
+                    sh '''
+                        echo "Cleaning existing container if exist"
+                        docker ps -a | grep -i $IMAGE_NAME && docker rm -f $IMAGE_NAME
+                        docker run --name $IMAGE_NAME -d -p $APP_EXPOSED_PORT:$APP_CONTAINER_PORT -e PORT=$APP_CONTAINER_PORT ${DOCKERHUB_ID}/$IMAGE_NAME:$IMAGE_TAG
+                        sleep 5
+                    '''
+                }
             }
         }
       stage('Test image'){
