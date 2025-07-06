@@ -18,8 +18,8 @@
          stage("Sonarqube Analysis "){
             steps{
                 withSonarQubeEnv('sonar-server') {
-                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=uptime \
-                    -Dsonar.projectKey=uptime '''
+                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=cicd-static-website \
+                    -Dsonar.projectKey=cicd-static-website '''
                 }
             }
         }
@@ -38,7 +38,7 @@
         }
         stage('TRIVY FS SCAN') {
             steps {
-                sh "trivy fs . &gt; trivyfs.json"
+                sh "sh 'trivy fs --format table -o trivy-fs-report.html .'"
             }
         }
         stage('Build Image'){
